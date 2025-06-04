@@ -4,7 +4,9 @@ This project automates key Linux hardening practices using a modular set of Bash
 
 ## 📂 Project Structure
 
-linux-hardening-script/
+<pre>
+  ```
+  linux-hardening-script/
 ├── scripts/
 │ ├── ufw_setup.sh
 │ ├── ssh_hardening.sh
@@ -12,10 +14,11 @@ linux-hardening-script/
 │ ├── file_permissions.sh
 │ └── audit_config.sh
 ├── screenshots/
-│ └── (add terminal screenshots or proof-of-execution here)
 ├── hardening_report_template.md
 └── README.md
 
+  ```
+</pre>
 
 
 | Script | Description |
