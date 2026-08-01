@@ -1,0 +1,7 @@
+# Backups created by hardening scripts
+*.bak
+*.backup
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,57 +1,61 @@
+# Linux Hardening Report
 
----
-
-## 📄 `hardening_report_template.md`
-
-```markdown
-# 🛡️ Linux Hardening Report
-
-Date: 3-6-2025  
-Prepared by: Jagruth P.
+**Date:** 3-6-2025  
+**Prepared by:** Jagruth P.
 
 ---
 
 ## 1. Firewall Configuration (UFW)
 
-**Default Policy:**  
-- Incoming: Deny  
+**Default Policy:**
+- Incoming: Deny
 - Outgoing: Allow
 
-**Allowed Ports:**  
-- 22, 2222 (SSH)  
-- 6000-6007 (X11)  
+**Allowed Ports:**
+- 22, 2222 (SSH)
+- 6000-6007 (X11 — remove if not needed)
 
-**Denied:**  
-- Port 25 (outgoing), HTTP, specific IPs  
+**Denied:**
+- Port 25 (outgoing SMTP)
+- HTTP (inbound, if configured)
 
-**Verification:**  
-`sudo ufw status verbose`
+**Verification:**
+```bash
+sudo ufw status verbose
+```
 
 ---
 
 ## 2. SSH Hardening
 
-- Root login: Disabled  
-- SSH Port: Changed from 22 → 2222  
-- Protocol: Forced to v2  
-- MaxAuthTries: 3  
+| Control | Value |
+|---------|-------|
+| Root login | Disabled |
+| SSH Port | 2222 (changed from 22) |
+| MaxAuthTries | 3 |
 
-**Verification:**  
-`cat /etc/ssh/sshd_config`  
-`sudo systemctl restart ssh`
+**Verification:**
+```bash
+grep -E '^(Port|PermitRootLogin|MaxAuthTries)' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+```
 
 ---
 
 ## 3. User Account Policies
 
-- Password Length: 12+  
-- Password Max Days: 90  
-- Inactive Lock: After 30 days  
-- Guest Login: Disabled  
+| Control | Value |
+|---------|-------|
+| Password min length | 12 |
+| Password max age | 90 days |
+| Inactive account lock | 30 days |
+| Guest login | Disabled |
 
-**Verification:**  
-`cat /etc/login.defs`  
-`awk -F: '$3 >= 1000' /etc/passwd`
+**Verification:**
+```bash
+cat /etc/login.defs | grep -E 'PASS_(MIN|MAX)'
+awk -F: '$3 >= 1000' /etc/passwd
+```
 
 ---
 
@@ -61,27 +65,31 @@ Prepared by: Jagruth P.
 |------|------------|-------------|
 | `/etc/shadow` | `640` | `root:shadow` |
 | `/etc/passwd` | `644` | `root:root` |
+| `/etc/gshadow` | `640` | `root:shadow` |
 
-- `/tmp`: Sticky bit set (1777)
-- Home dirs: Set to 750
-- SUID/777 Files Audited
+- `/tmp`: Sticky bit set (`1777`)
+- Home directories: `750`
+- SUID/SGID and world-writable files: Audited (list in appendix)
 
 ---
 
 ## 5. Audit Logging (auditd)
 
 **Rules Applied:**
-- Monitor: `/etc/passwd`, `/etc/shadow`
-- Log: `sudo` use, binary execution, login attempts
+- Monitor changes to `/etc/passwd`, `/etc/shadow`
+- Log `sudo` usage, login success/failure, binary execution
 
 **Verification:**
-- Active Rules: `sudo auditctl -l`  
-- Logs: `sudo less /var/log/audit/audit.log`  
-- Search by key: `sudo ausearch -k passwd_changes`
+```bash
+sudo auditctl -l
+sudo less /var/log/audit/audit.log
+sudo ausearch -k passwd_changes
+```
 
 ---
 
 ## Summary
 
-The above steps enforce baseline Linux system hardening against common misconfigurations and privilege escalations. Further monitoring and patch management are recommended.
+The above controls enforce baseline Linux hardening against common misconfigurations and privilege escalation vectors. Ongoing patch management, log review, and periodic re-audits are recommended.
 
+**Next steps:** Tune audit rules for log volume, add fail2ban for SSH, evaluate AppArmor/SELinux profiles.

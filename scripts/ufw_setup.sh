@@ -23,9 +23,8 @@ sudo ufw allow from 203.0.113.4
 sudo ufw allow from 203.0.113.4 to any port 22
 sudo ufw allow from 203.0.113.0/24
 
-# Deny rules
+# Deny rules (customize IPs/ports for your environment)
 sudo ufw deny http
-sudo ufw deny from 203.0.113.4
 sudo ufw deny out 25
 
 # Enable UFW
